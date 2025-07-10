@@ -6,7 +6,7 @@ $zipUrl       = "https://cdn.zabbix.com/zabbix/binaries/stable/7.4/latest/zabbix
 $zipPath      = "$env:TEMP\zabbix_agent.zip"
 $extractPath  = "$env:TEMP\zabbix_extracted"
 $installPath  = "C:\Program Files\Zabbix Agent"
-$serverIP     = "Your Zabbix Server IP"  # <-- Replace this
+$serverIP     = "Your Zabbix Server IP"  
 $hostname     = $env:COMPUTERNAME
 $configFile   = "$installPath\conf\zabbix_agentd.conf"
 $agentExe     = "$installPath\bin\zabbix_agentd.exe"
@@ -17,7 +17,7 @@ $agentExe     = "$installPath\bin\zabbix_agentd.exe"
 # -------------------------
 # Uninstall Existing Agent
 # -------------------------
-Write-Host "[*] Checking for existing Zabbix Agent service..."
+Write-Host "[*] Checking for existing Zabbix Agent service."
 
 $existingService = Get-Service -Name "Zabbix Agent" -ErrorAction SilentlyContinue
 if ($existingService) {
@@ -43,27 +43,27 @@ if ($app) {
 # Cleanup Old Files
 # -------------------------
 if (Test-Path $installPath) {
-    Write-Host "[*] Removing old installation files..."
+    Write-Host "[*] Removing old installation files."
     Remove-Item -Path $installPath -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 # -------------------------
 # Download & Install New Agent
 # -------------------------
-Write-Host "[*] Downloading Zabbix Agent package..."
+Write-Host "[*] Downloading Zabbix Agent package."
 Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
 
-Write-Host "[*] Extracting package..."
+Write-Host "[*] Extracting package."
 Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
 
-Write-Host "[*] Copying files to install directory..."
+Write-Host "[*] Copying files to install directory."
 New-Item -ItemType Directory -Force -Path $installPath | Out-Null
 Copy-Item "$extractPath\*" "$installPath\" -Recurse -Force
 
 # -------------------------
 # Update Configuration File
 # -------------------------
-Write-Host "[*] Updating agent configuration..."
+Write-Host "[*] Updating agent configuration."
 (Get-Content $configFile) |
     ForEach-Object {
         $_ -replace '^Server=.*', "Server=$serverIP" `
@@ -78,7 +78,7 @@ if (-not (Select-String -Path $configFile -Pattern '^Hostname=')) {
 # -------------------------
 # Register and Start Service
 # -------------------------
-Write-Host "[*] Registering Zabbix Agent service..."
+Write-Host "[*] Registering Zabbix Agent service."
 & "$agentExe" --config "$configFile" --install
 
 Write-Host "[*] Starting Zabbix Agent..."
@@ -87,7 +87,7 @@ Start-Service "Zabbix Agent"
 # -------------------------
 # Final Cleanup
 # -------------------------
-Write-Host "[*] Cleaning up temporary files..."
+Write-Host "[*] Cleaning up temporary files."
 Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 Remove-Item $extractPath -Recurse -Force -ErrorAction SilentlyContinue
 
